@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daud Crypto Suite | University Task Project</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Fira+Code:wght@300;500&family=Rajdhani:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        /* --- CORE STYLING (THE TERMINAL LOOK) --- */
+        :root {
+            --primary: #00f2ff;
+            --accent: #bc00ff;
+            --success: #00ff88;
+            --bg-deep: #02040a;
+            --panel: rgba(10, 15, 25, 0.9);
+            --border: rgba(0, 242, 255, 0.2);
+        }
+
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
+
+        body {
+            background-color: var(--bg-deep);
+            color: #e0e0e0;
+            font-family: 'Rajdhani', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            background-image: linear-gradient(rgba(0,0,0,0.9), rgba(0,0,0,0.9)), 
+                              url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
+        }
+
+        /* --- STARTUP ANIMATION (THE DAWOOD LOGO) --- */
+        #loading-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 10000; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; text-align: center;
+        }
+
+        .shining-glitch {
+            font-size: 5rem; font-family: 'Orbitron', sans-serif; font-weight: 900;
+            color: #fff; text-shadow: 0 0 20px var(--primary);
+            animation: glitch 1s infinite alternate;
+        }
+
+        @keyframes glitch {
+            0% { transform: skew(0deg); } 20% { transform: skew(2deg); text-shadow: 2px 0 var(--accent); }
+            100% { transform: skew(-1deg); text-shadow: -2px 0 var(--primary); }
+        }
+
+        /* --- NEW LOADING BAR STYLES --- */
+        .loading-container {
+            width: 300px;
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .progress-bar-wrapper {
+            width: 100%;
+            height: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            width: 0%; /* Initial width */
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            box-shadow: 0 0 10px var(--primary);
+            transition: width 0.1s linear; /* Smooth transition */
+        }
+
+        .loading-text {
+            color: var(--primary);
+            font-family: 'Orbitron', sans-serif;
+            margin-top: 10px;
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+        }
+
+        /* --- NAV & LAYOUT --- */
+        .top-navbar {
+            height: 70px; background: rgba(0,0,0,0.95);
+            border-bottom: 1px solid var(--border);
+            display: flex; align-items: center; padding: 0 40px; justify-content: space-between;
+        }
+
+        .main-wrapper {
+            display: grid; grid-template-columns: 320px 1fr 400px;
+            height: calc(100vh - 70px);
+        }
+
+        /* --- SIDEBAR COMPONENTS --- */
+        .sidebar { background: var(--panel); border-right: 1px solid var(--border); overflow-y: auto; padding: 30px; }
+        .sidebar h6 { font-family: 'Orbitron'; font-size: 0.7rem; letter-spacing: 3px; color: var(--primary); margin: 25px 0 15px; }
+        
+        .algo-btn {
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
+            padding: 15px; border-radius: 10px; margin-bottom: 10px; cursor: pointer;
+            transition: 0.4s; display: flex; align-items: center; gap: 12px; font-weight: 600;
+        }
+
+        .algo-btn:hover { background: rgba(0, 242, 255, 0.1); border-color: var(--primary); transform: translateX(8px); }
+        .algo-btn.active { background: linear-gradient(90deg, var(--primary), var(--accent)); color: black; box-shadow: 0 0 25px rgba(0,242,255,0.4); }
+
+        /* --- WORKSTATION AREA --- */
+        .center-stage { padding: 40px; overflow-y: auto; position: relative; }
+        .glass-terminal {
+            background: rgba(0,0,0,0.4); border: 1px solid var(--border);
+            border-radius: 25px; padding: 45px; backdrop-filter: blur(10px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+        }
+
+        .custom-input {
+            background: #05070a !important; border: 1px solid #222 !important;
+            color: var(--primary) !important; font-family: 'Fira Code', monospace;
+            padding: 20px; border-radius: 15px !important; transition: 0.5s;
+        }
+
+        .custom-input:focus { border-color: var(--primary) !important; box-shadow: 0 0 20px rgba(0, 242, 255, 0.2); }
+
+        .btn-exe {
+            height: 65px; border-radius: 15px; font-family: 'Orbitron'; font-weight: 700;
+            letter-spacing: 2px; transition: 0.5s; text-transform: uppercase;
+        }
+        .btn-enc { background: var(--primary); color: #000; border: none; }
+        .btn-dec { background: transparent; border: 2px solid var(--primary); color: #fff; }
+        .btn-exe:hover { transform: translateY(-5px); box-shadow: 0 10px 30px var(--primary); }
+
+        /* --- RIGHT SIDEBAR: THEORY & DOCS --- */
+        .info-panel { background: #06080e; border-left: 1px solid var(--border); padding: 35px; overflow-y: auto; }
+        .doc-header { font-family: 'Orbitron'; color: var(--primary); font-size: 1.1rem; border-left: 5px solid var(--primary); padding-left: 15px; margin-bottom: 25px; }
+        .doc-content { font-size: 1rem; line-height: 2; color: #b0b0b0; text-align: justify; }
+        
+        .matrix-grid {
+            display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px;
+            background: #111; padding: 10px; border-radius: 8px; margin-top: 20px;
+        }
+        .matrix-cell { background: #222; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-family: 'Orbitron'; color: var(--primary); border: 1px solid #333; }
+
+        /* --- OUTPUT PANEL --- */
+        #res-box { display: none; margin-top: 40px; border-radius: 20px; border: 1px solid var(--success); overflow: hidden; animation: zoomIn 0.5s; }
+        .res-header { background: rgba(0, 255, 136, 0.1); padding: 15px 25px; color: var(--success); font-family: 'Orbitron'; font-size: 0.8rem; }
+        .res-body { background: #00100a; padding: 30px; font-family: 'Fira Code', monospace; font-size: 1.5rem; word-break: break-all; }
+    </style>
+</head>
+<body onload="startLoading()"> <div id="loading-screen">
+    <div class="animate__animated animate__fadeIn d-flex flex-column align-items-center">
+        <h1 class="shining-glitch">DAUD CORE</h1>
+        <p class="orbitron text-info mt-3" style="letter-spacing: 10px;">UNIVERSITY TASK PROJECT v5.0</p>
+        
+        <div class="loading-container" id="loading-section">
+            <div class="progress-bar-wrapper">
+                <div class="progress-bar-fill" id="progress-bar"></div>
+            </div>
+            <div class="loading-text" id="loading-percentage">0%</div>
+        </div>
+        
+        <button class="btn btn-outline-info mt-5 px-5 orbitron" id="init-button" style="display: none;" onclick="initializeSystem()">INITIALIZE SESSION</button>
+    </div>
+</div>
+
+<nav class="top-navbar">
+    <div class="d-flex align-items-center gap-3">
+        <div style="width: 40px; height: 40px; background: var(--primary); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+            <i class="fas fa-terminal text-black"></i>
+        </div>
+        <span class="orbitron fs-4 fw-bold">M.DAUD<span class="text-info">_TERMINAL</span></span>
+    </div>
+    <div class="d-flex gap-4 orbitron small">
+        <span class="text-secondary"><i class="fas fa-circle text-success me-2"></i>ENC_ENGINE: READY</span>
+        <span class="text-secondary"><i class="fas fa-circle text-success me-2"></i>MATH_CORE: ACTIVE</span>
+    </div>
+</nav>
+
+<div class="main-wrapper">
+    <aside class="sidebar">
+        <h6>CLASSIC SUBSTITUTION</h6>
+        <div class="algo-btn active" onclick="switchAlgo('Caesar')"><i class="fas fa-sort-numeric-down"></i> Caesar Cipher</div>
+        <div class="algo-btn" onclick="switchAlgo('Vigenere')"><i class="fas fa-key"></i> Vigenère Cipher</div>
+        <div class="algo-btn" onclick="switchAlgo('Atbash')"><i class="fas fa-columns"></i> Atbash Mirror</div>
+        
+        <h6>BLOCK & MATRIX</h6>
+        <div class="algo-btn" onclick="switchAlgo('Playfair')"><i class="fas fa-th"></i> Playfair Matrix</div>
+        <div class="algo-btn" onclick="switchAlgo('Hill')"><i class="fas fa-border-all"></i> Hill Cipher</div>
+        
+        <h6>TRANSPOSITION</h6>
+        <div class="algo-btn" onclick="switchAlgo('RailFence')"><i class="fas fa-wave-square"></i> Rail Fence</div>
+        <div class="algo-btn" onclick="switchAlgo('Columnar')"><i class="fas fa-align-justify"></i> Columnar</div>
+
+        <h6>ABOUT SYSTEM</h6>
+        <div class="p-3 bg-dark rounded border border-secondary small text-secondary">
+            Developer: Muhammad Daud<br>
+            Version: 5.0.1<br>
+            Project: Cryptographic Suite
+        </div>
+    </aside>
+
+    <main class="center-stage">
+        <div class="glass-terminal">
+            <h2 id="algo-title" class="orbitron text-white mb-4">CAESAR CIPHER</h2>
+            
+            <div class="mb-4">
+                <label class="orbitron small text-info mb-2">Payload (Plaintext / Ciphertext)</label>
+                <textarea id="payload" class="form-control custom-input" rows="5" placeholder="System awaits input..."></textarea>
+            </div>
+
+            <div class="row g-4 mb-5">
+                <div class="col-md-6">
+                    <label class="orbitron small text-info mb-2" id="key-label">Secret Shift Key</label>
+                    <input type="text" id="secret-key" class="form-control custom-input" placeholder="Variable Key">
+                </div>
+                <div class="col-md-6 d-flex align-items-end">
+                    <div class="p-3 border border-secondary rounded w-100 text-center">
+                        <span class="orbitron small text-secondary">SECURITY:</span>
+                        <span class="text-info fw-bold ms-2" id="sec-lvl">MODERATE</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex gap-3">
+                <button class="btn btn-exe btn-enc w-100" onclick="process('encrypt')">Perform Encryption</button>
+                <button class="btn btn-exe btn-dec w-100" onclick="process('decrypt')">Perform Decryption</button>
+            </div>
+        </div>
+
+        <div id="res-box">
+            <div class="res-header d-flex justify-content-between">
+                <span>EXECUTION LOG: SUCCESS</span>
+                <span class="cursor-pointer" onclick="copy()"><i class="fas fa-copy"></i> Copy Result</span>
+            </div>
+            <div id="res-text" class="res-body text-white"></div>
+        </div>
+    </main>
+
+    <aside class="info-panel">
+        <div class="doc-header">THEORETICAL OVERVIEW</div>
+        <div id="doc-body" class="doc-content">
+            </div>
+
+        <div class="doc-header mt-5">MATHEMATICAL MODEL</div>
+        <div id="math-body" class="p-3 bg-dark border border-secondary rounded font-monospace small text-info">
+            </div>
+
+        <div class="doc-header mt-5">PRACTICAL STEP-BY-STEP</div>
+        <div id="step-body" class="doc-content small">
+            </div>
+    </aside>
+</div>
+
+<script>
+    let current = 'Caesar';
+
+    // --- NEW LOADING LOGIC ---
+    let progress = 0;
+    const loadingInterval = 50; // Milliseconds between percentage updates (adjust for speed)
+
+    function startLoading() {
+        const progressBar = document.getElementById('progress-bar');
+        const loadingPercentage = document.getElementById('loading-percentage');
+        const initButton = document.getElementById('init-button');
+        const loadingSection = document.getElementById('loading-section');
+
+        const timer = setInterval(() => {
+            progress++;
+            if (progress <= 100) {
+                progressBar.style.width = progress + '%';
+                loadingPercentage.innerText = progress + '%';
+            } else {
+                clearInterval(timer);
+                // Loading complete: hide bar, show button
+                loadingSection.style.display = 'none';
+                initButton.style.display = 'block';
+                // Add an animation to the button to make it look active
+                initButton.classList.add('animate__animated', 'animate__pulse', 'animate__infinite');
+            }
+        }, loadingInterval);
+    }
+    // ----------------------------
+
+    const library = {
+        'Caesar': {
+            title: "Caesar Cipher",
+            keyName: "Shift (Integer 0-25)",
+            theory: "Caesar Cipher aik tareekhi 'Substitution Cipher' hai. Is mein har alphabet ko aik makhsoos number (shift) ke mutabiq aage ya peeche move kiya jata hai.",
+            math: "Encryption: E(x) = (x + n) mod 26\nDecryption: D(x) = (x - n) mod 26",
+            steps: "1. Letter ki position dhundein.\n2. Key jama (En) ya manfi (De) karein.\n3. Modulo 26 apply karein."
+        },
+        'Vigenere': {
+            title: "Vigenère Engine",
+            keyName: "Keyword (e.g. SECRET)",
+            theory: "Ye aik 'Polyalphabetic' cipher hai jo keyword use karta hai. Is se frequency analysis attack mushkil ho jata hai.",
+            math: "C(i) = (P(i) + K(i mod m)) mod 26",
+            steps: "1. Keyword repeat karein.\n2. Letter position aur key position ko add karein.\n3. Result ka character nikalain."
+        },
+        'Atbash': {
+            title: "Atbash Mirror",
+            keyName: "No Key Required",
+            theory: "Atbash aik simple substitution cipher hai jahan alphabet ko reverse kar diya jata hai. A ko Z se, B ko Y se badla jata hai.",
+            math: "E(x) = (25 - x) mod 26",
+            steps: "1. Alphabet ko ulta likhein.\n2. Har harf ko uske reverse partner se badal dein."
+        },
+        'Playfair': {
+            title: "Playfair Matrix",
+            keyName: "Keyword (e.g. MONARCHY)",
+            theory: "Ye pairs of letters (digraphs) ko encrypt karta hai 5x5 matrix use karte hue. Is mein 'J' ko 'I' ke sath merge kiya jata hai.",
+            math: "Rule-based: Same Row, Same Column, or Rectangle.",
+            steps: "1. 5x5 Matrix banayein.\n2. Text ko pairs mein torein.\n3. Matrix rules apply karein."
+        },
+        'Hill': {
+            title: "Hill Cipher",
+            keyName: "Matrix Key (4 numbers: 3 3 2 5)",
+            theory: "Ye linear algebra par mabni hai. Encryption ke liye matrix multiplication aur decryption ke liye matrix inversion use hoti hai.",
+            math: "Enc: C = (K * P) mod 26 | Dec: P = (K⁻¹ * C) mod 26",
+            steps: "1. Key ko 2x2 matrix mein convert karein.\n2. Determinant aur Adjoint se Inverse nikalain.\n3. Matrix multiplication apply karein."
+        },
+        'RailFence': {
+            title: "Rail Fence (Zig-Zag)",
+            keyName: "Number of Rails (e.g. 3)",
+            theory: "Rail Fence aik 'Transposition Cipher' hai. Is mein message ko seedha likhne ke bajaye 'W' shape ya zig-zag pattern mein likha jata hai aur phir row-wise parha jata hai takay order tabdeel ho jaye.",
+            math: "Pattern: Zig-Zag Matrix Mapping",
+            steps: "1. Rails (Rows) tay karein.\n2. Zig-zag pattern mein letters likhein.\n3. Rows ko line se read karke result nikalain."
+        },
+        'Columnar': {
+            title: "Columnar Transposition",
+            keyName: "Single Digit Key (e.g. 4)",
+            theory: "Ye aik 'Rectangular Transposition' cipher hai. Is mein pure message ko aik makhsoos number (key) ke columns mein likha jata hai aur phir columns ko vertically parha jata hai takay letters ki position badal jaye.",
+            math: "Index mapping: (row * key) + col",
+            steps: "1. Key ke mutabiq columns ki tadad tay karein.\n2. Message ko rows mein fill karein.\n3. Har column ko oper se niche tak parh kar ciphertext banayein."
+        }
+    };
+
+    function initializeSystem() {
+        // Stop the pulse animation when clicking
+        document.getElementById('init-button').classList.remove('animate__pulse', 'animate__infinite');
+        
+        document.getElementById('loading-screen').classList.add('animate__animated', 'animate__fadeOutUp');
+        setTimeout(() => {
+            document.getElementById('loading-screen').style.display='none';
+            // Start the default view only after the splash screen is gone
+            switchAlgo('Caesar');
+        }, 1000);
+    }
+
+    function switchAlgo(name) {
+        current = name;
+        const data = library[name] || library['Caesar'];
+        document.getElementById('algo-title').innerText = data.title.toUpperCase();
+        document.getElementById('key-label').innerText = data.keyName;
+        document.getElementById('doc-body').innerText = data.theory;
+        document.getElementById('math-body').innerText = data.math;
+        document.getElementById('step-body').innerText = data.steps;
+
+        document.querySelectorAll('.algo-btn').forEach(b => {
+            b.classList.remove('active');
+            // More precise selection based on data-algo if you added it, 
+            // but this current text search works.
+            if(b.innerText.trim() === `${name} Cipher` || b.innerText.trim() === `${name} Mirror` || b.innerText.trim() === `${name} Matrix` || b.innerText.trim() === `${name} Engine` || b.innerText.trim() === `${name}`) {
+                 b.classList.add('active');
+            }
+        });
+        document.getElementById('res-box').style.display = 'none';
+    }
+
+    // --- HELPER FUNCTIONS FOR ADVANCED LOGIC ---
+    function mod(n, m) { return ((n % m) + m) % m; }
+
+    function getPlayfairMatrix(key) {
+        key = key.toUpperCase().replace(/J/g, "I").replace(/[^A-Z]/g, "");
+        let alphabet = "ABCDEFGHIKLMNOPQRSTUVWXYZ";
+        let finalKey = [...new Set(key + alphabet)];
+        let matrix = [];
+        for (let i = 0; i < 5; i++) matrix.push(finalKey.slice(i * 5, i * 5 + 5));
+        return matrix;
+    }
+
+    function process(mode) {
+        let payloadInput = document.getElementById('payload').value.toUpperCase();
+        let input = payloadInput.replace(/[^A-Z]/g, "");
+        if (current === 'Playfair') input = payloadInput.replace(/J/g, "I").replace(/[^A-Z]/g, "");
+        
+        let keyStr = document.getElementById('secret-key').value;
+        let result = "";
+
+        // --- CAESAR, VIGENERE, ATBASH, PLAYFAIR, HILL (Pehele wala logic) ---
+        if (current === 'Caesar') {
+            let s = parseInt(keyStr) || 0;
+            if (mode === 'decrypt') s = 26 - (s % 26);
+            result = input.split('').map(c => String.fromCharCode(((c.charCodeAt(0) - 65 + s) % 26) + 65)).join('');
+        } 
+        else if (current === 'Vigenere') {
+            let k = keyStr.toUpperCase().replace(/[^A-Z]/g, '');
+            if (!k) return alert("Please enter a Keyword!");
+            for (let i = 0, j = 0; i < input.length; i++) {
+                let s = k.charCodeAt(j % k.length) - 65;
+                if (mode === 'decrypt') s = 26 - s;
+                result += String.fromCharCode(((input.charCodeAt(i) - 65 + s) % 26) + 65);
+                j++;
+            }
+        }
+        else if (current === 'Atbash') {
+            result = input.split('').map(c => String.fromCharCode(90 - (c.charCodeAt(0) - 65))).join('');
+        }
+        else if (current === 'Playfair') {
+            let matrix = getPlayfairMatrix(keyStr);
+            let findPos = (char) => {
+                for (let r = 0; r < 5; r++) 
+                    for (let c = 0; c < 5; c++) 
+                        if (matrix[r][c] === char) return [r, c];
+            };
+            let pairs = [];
+            for (let i = 0; i < input.length; i += 2) {
+                let a = input[i], b = input[i+1] || 'X';
+                if (a === b) { b = 'X'; i--; }
+                pairs.push([a, b]);
+            }
+            pairs.forEach(pair => {
+                let [r1, c1] = findPos(pair[0]);
+                let [r2, c2] = findPos(pair[1]);
+                let shift = (mode === 'encrypt') ? 1 : -1;
+                if (r1 === r2) result += matrix[r1][mod(c1 + shift, 5)] + matrix[r2][mod(c2 + shift, 5)];
+                else if (c1 === c2) result += matrix[mod(r1 + shift, 5)][c1] + matrix[mod(r2 + shift, 5)][c2];
+                else result += matrix[r1][c2] + matrix[r2][c1];
+            });
+        }
+        else if (current === 'Hill') {
+            let k = keyStr.split(/\s+/).filter(x => x !== "").map(Number);
+            if (k.length < 4) return alert("Please enter 4 numbers (e.g., 3 3 2 5)");
+            let a = k[0], b = k[1], c = k[2], d = k[3];
+            let det = mod(a * d - b * c, 26);
+            let getInvDet = (n) => {
+                for (let x = 1; x < 26; x++) { if (mod(n * x, 26) === 1) return x; }
+                return -1;
+            };
+            let invDet = getInvDet(det);
+            if (invDet === -1) {
+                while (getInvDet(mod(a * d - b * c, 26)) === -1) { d++; }
+                det = mod(a * d - b * c, 26);
+                invDet = getInvDet(det);
+            }
+            let finalMatrix = (mode === 'encrypt') ? [[a, b], [c, d]] : 
+                [[mod(d * invDet, 26), mod(-b * invDet, 26)], [mod(-c * invDet, 26), mod(a * invDet, 26)]];
+            if (input.length % 2 !== 0) input += 'X';
+            for (let i = 0; i < input.length; i += 2) {
+                let p1 = input.charCodeAt(i) - 65, p2 = input.charCodeAt(i+1) - 65;
+                result += String.fromCharCode(mod(finalMatrix[0][0] * p1 + finalMatrix[0][1] * p2, 26) + 65);
+                result += String.fromCharCode(mod(finalMatrix[1][0] * p1 + finalMatrix[1][1] * p2, 26) + 65);
+            }
+        }
+        // --- RAIL FENCE ---
+        else if (current === 'RailFence') {
+            let r = parseInt(keyStr) || 2;
+            if (mode === 'encrypt') {
+                let fence = Array.from({length: r}, () => []);
+                let row = 0, step = 1;
+                for (let char of input) {
+                    fence[row].push(char);
+                    row += step;
+                    if (row === 0 || row === r - 1) step *= -1;
+                }
+                result = fence.flat().join('');
+            } else {
+                let pattern = new Array(input.length).fill(0).map(() => new Array(r).fill(null));
+                let row = 0, step = 1;
+                for (let i = 0; i < input.length; i++) {
+                    pattern[i][row] = '*';
+                    row += step;
+                    if (row === 0 || row === r - 1) step *= -1;
+                }
+                let idx = 0;
+                for (let j = 0; j < r; j++) {
+                    for (let i = 0; i < input.length; i++) {
+                        if (pattern[i][j] === '*' && idx < input.length) pattern[i][j] = input[idx++];
+                    }
+                }
+                row = 0; step = 1;
+                for (let i = 0; i < input.length; i++) {
+                    result += pattern[i][row];
+                    row += step;
+                    if (row === 0 || row === r - 1) step *= -1;
+                }
+            }
+        }
+        // --- SINGLE DIGIT COLUMNAR TRANSPOSITION ---
+        else if (current === 'Columnar') {
+            let cols = parseInt(keyStr);
+            if (isNaN(cols) || cols < 1) return alert("Please enter a Single Number (e.g., 4)!");
+            
+            if (mode === 'encrypt') {
+                let rows = Math.ceil(input.length / cols);
+                let padInput = input.padEnd(rows * cols, 'X');
+                let grid = [];
+                for (let i = 0; i < rows; i++) {
+                    grid.push(padInput.substr(i * cols, cols));
+                }
+                
+                // Read Column by Column
+                for (let c = 0; c < cols; c++) {
+                    for (let r = 0; r < rows; r++) {
+                        result += grid[r][c];
+                    }
+                }
+            } else {
+                let rows = Math.ceil(input.length / cols);
+                let grid = Array.from({length: rows}, () => new Array(cols));
+                let idx = 0;
+                
+                // Fill Column by Column (for Decryption)
+                for (let c = 0; c < cols; c++) {
+                    for (let r = 0; r < rows; r++) {
+                        if (idx < input.length) {
+                            grid[r][c] = input[idx++];
+                        }
+                    }
+                }
+                
+                // Read Row by Row to get Original Text
+                for (let r = 0; r < rows; r++) {
+                    for (let c = 0; c < cols; c++) {
+                        if (grid[r][c]) result += grid[r][c];
+                    }
+                }
+            }
+        }
+
+        document.getElementById('res-box').style.display = 'block';
+        document.getElementById('res-text').innerText = result;
+    }
+    function copy() {
+        navigator.clipboard.writeText(document.getElementById('res-text').innerText);
+        alert("Result Copied to Clipboard!");
+    }
+</script>
+
+</body>
+</html>
